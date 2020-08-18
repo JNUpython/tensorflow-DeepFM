@@ -6,8 +6,13 @@ import pandas as pd
 
 
 class FeatureDictionary(object):
-    def __init__(self, trainfile=None, testfile=None,
-                 dfTrain=None, dfTest=None, numeric_cols=[], ignore_cols=[]):
+    def __init__(self,
+                 trainfile=None,
+                 testfile=None,
+                 dfTrain=None,
+                 dfTest=None,
+                 numeric_cols=[],
+                 ignore_cols=[]):
         assert not ((trainfile is None) and (dfTrain is None)), "trainfile or dfTrain at least one is set"
         assert not ((trainfile is not None) and (dfTrain is not None)), "only one can be set"
         assert not ((testfile is None) and (dfTest is None)), "testfile or dfTest at least one is set"
@@ -21,6 +26,7 @@ class FeatureDictionary(object):
         self.gen_feat_dict()
 
     def gen_feat_dict(self):
+        # 允许文件给处原始数据，或者直接给df
         if self.dfTrain is None:
             dfTrain = pd.read_csv(self.trainfile)
         else:
@@ -38,10 +44,11 @@ class FeatureDictionary(object):
             if col in self.numeric_cols:
                 # map to a single index
                 self.feat_dict[col] = tc
-                tc += 1
+                tc += 1  # 对连续变量也进行编号
             else:
+                # 将离散的变量的种类进行编号： 从0开始
                 us = df[col].unique()
-                self.feat_dict[col] = dict(zip(us, range(tc, len(us)+tc)))
+                self.feat_dict[col] = dict(zip(us, range(tc, len(us) + tc)))  # 用于将离散变量转化为2值变量？
                 tc += len(us)
         self.feat_dim = tc
 
@@ -68,6 +75,7 @@ class DataParser(object):
         dfv = dfi.copy()
         for col in dfi.columns:
             if col in self.feat_dict.ignore_cols:
+                # 删除不需要的特征
                 dfi.drop(col, axis=1, inplace=True)
                 dfv.drop(col, axis=1, inplace=True)
                 continue
@@ -75,7 +83,7 @@ class DataParser(object):
                 dfi[col] = self.feat_dict.feat_dict[col]
             else:
                 dfi[col] = dfi[col].map(self.feat_dict.feat_dict[col])
-                dfv[col] = 1.
+                dfv[col] = 1.  # 二值特征，目前都是1，自身数值变覆盖掉了
 
         # list of list of feature indices of each sample in the dataset
         Xi = dfi.values.tolist()
@@ -85,4 +93,3 @@ class DataParser(object):
             return Xi, Xv, y
         else:
             return Xi, Xv, ids
-

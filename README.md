@@ -116,3 +116,8 @@ This project gets inspirations from the following projects:
 
 # License
 MIT
+
+
+## 学习补充
+[特征筛选](https://blog.csdn.net/qq_37195507/article/details/78553581)
+[模型讲解](https://blog.csdn.net/john_xyz/article/details/78933253)
